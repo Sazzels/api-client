@@ -28,19 +28,19 @@
 		{/if}
 		<div class="mr-2 flex justify-between">
 			<h4 class="text-text-highlight">Status-Code:</h4>
-			<ClipboardButton data={response.statusCode.toFixed(0)} />
+			<ClipboardButton id="status-code-clipboard-btn" data={response.statusCode.toFixed(0)} />
 		</div>
 		<p data-testid="status-code">{response.statusCode}</p>
 		<hr class="my-2 mr-2" />
 		<div class="mr-2 flex justify-between">
 			<h4 class="text-text-highlight">Elapsed Time:</h4>
-			<ClipboardButton data={response.elapsedTime} />
+			<ClipboardButton id="elapsed-time-clipboard-btn" data={response.elapsedTime} />
 		</div>
 		<p>{response.elapsedTime}</p>
 		<hr class="my-2 mr-2" />
 		<div class="mr-2 flex justify-between">
 			<h4 class="text-text-highlight">Send Header:</h4>
-			<ClipboardButton data={JSON.stringify(response.sendHeader)} />
+			<ClipboardButton id="send-header-clipboard-btn" data={JSON.stringify(response.sendHeader)} />
 		</div>
 		<div data-testid="send-headers">
 			{#each Object.entries(response.sendHeader) as [key, value] (key)}
@@ -50,7 +50,7 @@
 		<hr class="my-2 mr-2" />
 		<div class="mr-2 flex justify-between">
 			<h4 class="text-text-highlight">Received Header:</h4>
-			<ClipboardButton data={JSON.stringify(response.receivedHeader)} />
+			<ClipboardButton id="received-header-clipboard-btn" data={JSON.stringify(response.receivedHeader)} />
 		</div>
 		{#each Object.entries(response.receivedHeader) as [key, value] (key)}
 			<p class="mr-2 break-words">
@@ -66,7 +66,7 @@
 		<hr class="my-2 mr-2" />
 		<div class="mr-2 flex justify-between">
 			<h4 class="text-text-highlight">Payload:</h4>
-			<ClipboardButton data={response.responseBody} />
+			<ClipboardButton id="payload-clipboard-btn" data={response.responseBody} />
 		</div>
 		{#if isJsonResponse}
 			<div class="mr-2">
