@@ -47,7 +47,7 @@ func TestRequest(t *testing.T) {
 	if err != nil {
 		t.Fatal("should not fail to create project")
 	}
-	collectionsRepository := database.NewRepository[database.Collection](databaseClient)
+	collectionsRepository := database.NewCollectionRepository(databaseClient)
 	collection, err := collectionsRepository.Create(&database.Collection{
 		Name:              "test collection",
 		ProjectID:         project.ID,
@@ -61,7 +61,7 @@ func TestRequest(t *testing.T) {
 	httpRequestRepository := database.NewHttpRequestRepository(databaseClient)
 	defaultConfiguration := configuration.Configuration{}
 	readWriter.Write(defaultConfiguration)
-	request := NewRequest(httpRequestRepository, readWriter)
+	request := NewRequest(httpRequestRepository, readWriter, collectionsRepository)
 	httpRequest, err := httpRequestRepository.Create(&database.HttpRequest{
 		Name:         "test request",
 		CollectionID: collection.ID,
