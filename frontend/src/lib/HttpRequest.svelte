@@ -12,9 +12,11 @@
 	let {
 		request,
 		currentResponse,
+		environmentId,
 	}: {
 		request: frontend.HttpRequestDto;
 		currentResponse: frontend.RequestResponseDTO;
+		environmentId: number;
 	} = $props();
 
 	let loading = $state(false);
@@ -47,7 +49,7 @@
 		{:else if currentTab === PageTabIndex.Parameter}
 			<Params {request} />
 		{:else if currentTab === PageTabIndex.Header}
-			<Header {request} />
+			<Header {request} {environmentId} />
 		{:else if currentTab === PageTabIndex.Response}
 			<HttpResponseDetail response={currentResponse} {loading}></HttpResponseDetail>
 		{/if}

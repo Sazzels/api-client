@@ -90,3 +90,33 @@ export async function cleanupRequest(
 
 	await cleanupCollections(page, projectSetupUUID, collectionsSetupUUID);
 }
+
+export async function setupEnvironment(page: Page, environmentSetupUUID: string) {
+	await page.getByTestId('open-environment').click();
+	await page.locator('#new-environment').fill(environmentSetupUUID);
+	await expect(page.locator('#new-environment')).toHaveValue(environmentSetupUUID);
+	await page.locator('#create-new-environment').click();
+	await expect(page.locator('#new-environment')).toBeEmpty();
+	await expect(page.getByTestId('environments').getByRole('button', { name: environmentSetupUUID })).toBeVisible();
+
+	await page.getByTestId('environments').getByRole('button', { name: environmentSetupUUID }).click();
+	await page.locator('#new-header-key').fill('tom');
+	await page.locator('#new-header-value').fill('riddle');
+	await page.getByLabel('save').click();
+	await expect(page.locator('#new-header-key')).toBeEmpty();
+	await expect(page.locator('#new-header-value')).toBeEmpty();
+	await expect(page.getByTestId('environment-header')).toHaveCount(1);
+	await page.locator('#new-header-key').fill('perry');
+	await page.locator('#new-header-value').fill('hotter');
+	await page.getByLabel('save').click();
+	await expect(page.getByTestId('environment-header')).toHaveCount(2);
+
+	await page.getByRole('dialog').press('Escape');
+}
+
+export async function cleanupEnvironment(page: Page, environmentSetupUUID: string) {
+	await page.getByTestId('open-environment').click();
+	await page.getByTestId('environment').filter({ hasText: environmentSetupUUID }).getByLabel('delete').click();
+	await expect(page.getByTestId('environment').filter({ hasText: environmentSetupUUID })).toHaveCount(0);
+	await page.getByRole('dialog').press('Escape');
+}

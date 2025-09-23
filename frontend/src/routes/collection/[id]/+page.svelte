@@ -5,10 +5,19 @@
 	import HttpRequest from '$lib/HttpRequest.svelte';
 	import Websocket from '$lib/Websocket.svelte';
 	import { RequestTypes } from '$lib/enums/RequestTypes.ts';
+	import { getEnvironmentStore } from '$lib/environmentStore.svelte.ts';
+	import { getCollectionStore } from '$lib/collectionStore.svelte.ts';
 
 	const collectionId: number = Number($page.params.id);
+
 	const requestStore = getRequestStore();
+	const environmentStore = getEnvironmentStore();
+	const collectionStore = getCollectionStore();
+	// todo: preload selectedCollection
+	const selectedCollection = collectionStore.getById(collectionId);
+
 	let selectedRequest: frontend.HttpRequestDto | frontend.WebsocketRequestDto | undefined = $state();
+
 	let newRequestName = $state('');
 	let newRequestType: RequestTypes = $state(RequestTypes.HTTP);
 	let requestInEdit = $state(0);
@@ -19,6 +28,10 @@
 		selectedRequest = request;
 		currentResponse = new frontend.RequestResponseDTO();
 	}
+
+	function update() {
+		collectionStore.update(selectedCollection);
+	}
 </script>
 
 <svelte:head>
@@ -28,6 +41,52 @@
 
 <div class="grid h-full grid-cols-[40%_60%] overflow-hidden">
 	<div class="flex flex-col gap-y-2 overflow-y-auto pr-2">
+		<div class="mx-auto mt-2 flex w-full flex-row">
+			<div class="relative w-full">
+				<select
+					name="current-environment"
+					id="current-environment"
+					bind:value={selectedCollection.environmentId}
+					onchange={() => {
+						update();
+					}}
+					class="bg-background peer border-background-accent text-text focus:border-text-accent relative h-10 w-full
+					appearance-none rounded-sm border px-4 text-sm outline-hidden transition-all focus-visible:outline-hidden
+		  		focus:focus-visible:outline-hidden"
+				>
+					<option value={0}>no environment</option>
+					{#each environmentStore.environments as environment (environment.id)}
+						<option value={environment.id}>{environment.name}</option>
+					{/each}
+				</select>
+				<label
+					for="current-environment"
+					class="text-text before:bg-background peer-focus:text-text peer-disabled:text-text pointer-events-none
+					absolute top-2.5 left-2 z-1 px-2 text-sm transition-all peer-valid:-top-2 peer-valid:text-xs
+					peer-focus:-top-2 peer-focus:text-xs peer-disabled:cursor-not-allowed before:absolute before:top-0
+					before:left-0 before:z-[-1] before:block before:h-full before:w-full before:transition-all
+					peer-disabled:before:bg-transparent"
+				>
+					Selected Environment
+				</label>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="fill-text pointer-events-none absolute top-2.5 right-2 h-5 w-5 transition-all"
+					viewBox="0 0 20 20"
+					fill="currentColor"
+					aria-labelledby="title-04 description-04"
+					role="graphics-symbol"
+				>
+					<title id="title-04">Arrow Icon</title>
+					<desc id="description-04">Arrow icon of the select list.</desc>
+					<path
+						fill-rule="evenodd"
+						d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+						clip-rule="evenodd"
+					/>
+				</svg>
+			</div>
+		</div>
 		<div class="mx-auto mt-2 flex w-full flex-row">
 			<div class="relative min-w-34">
 				<select
@@ -202,7 +261,8 @@
 	</div>
 	<section class="flex h-full flex-col overflow-y-hidden">
 		{#if selectedRequest !== undefined && selectedRequest.type === RequestTypes.HTTP}
-			<HttpRequest request={selectedRequest} {currentResponse}></HttpRequest>
+			<HttpRequest request={selectedRequest} {currentResponse} environmentId={selectedCollection.environmentId}
+			></HttpRequest>
 		{:else if selectedRequest !== undefined && selectedRequest.type === RequestTypes.WEBSOCKET}
 			<Websocket request={selectedRequest}></Websocket>
 		{/if}

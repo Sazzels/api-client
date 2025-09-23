@@ -9,6 +9,19 @@ import {
 import HttpRequestDto = frontend.HttpRequestDto;
 import WebsocketRequestDto = frontend.WebsocketRequestDto;
 import { RequestTypes } from '$lib/enums/RequestTypes.ts';
+import {
+	AddDisabledHeader,
+	AddHeader,
+	AddParameter,
+	RemoveDisabledHeader,
+	RemoveHeader,
+	RemoveParameter,
+	UpdateHeader,
+	UpdateParameter,
+} from '$lib/wailsjs/go/frontend/HttpRequests';
+import HttpRequestHeaderDto = frontend.HttpRequestHeaderDto;
+import HttpRequestParameterDto = frontend.HttpRequestParameterDto;
+import EnvironmentHeaderDTO = frontend.EnvironmentHeaderDTO;
 
 export class RequestStore {
 	private _requests: (HttpRequestDto | WebsocketRequestDto)[] = $state([]);
@@ -24,7 +37,7 @@ export class RequestStore {
 	}
 
 	public update(request: HttpRequestDto | WebsocketRequestDto): Promise<void> {
-		return new Promise<void>( (resolve, reject) => {
+		return new Promise<void>((resolve) => {
 			switch (request.type) {
 				case RequestTypes.HTTP:
 					Update(request as HttpRequestDto).then((newRequest: HttpRequestDto) => {
@@ -44,26 +57,88 @@ export class RequestStore {
 		});
 	}
 
+	public addHeader(httpRequestHeaderDto: HttpRequestHeaderDto, httpRequestDto: HttpRequestDto): void {
+		AddHeader(httpRequestHeaderDto, httpRequestDto).then((newHeader) => {
+			httpRequestDto.header ??= [];
+			httpRequestDto.header.push(newHeader);
+		});
+	}
+
+	public deleteHeader(httpRequestHeaderDto: HttpRequestHeaderDto, httpRequestDto: HttpRequestDto, index: number): void {
+		RemoveHeader(httpRequestHeaderDto).then(() => {
+			httpRequestDto.header.splice(index, 1);
+		});
+	}
+	public updateHeader(httpRequestHeaderDto: HttpRequestHeaderDto, httpRequestDto: HttpRequestDto, index: number): void {
+		UpdateHeader(httpRequestHeaderDto).then((newHeader) => {
+			httpRequestDto.header[index] = newHeader;
+		});
+	}
+
+	public addParameter(httpRequestParameterDto: HttpRequestParameterDto, httpRequestDto: HttpRequestDto): void {
+		AddParameter(httpRequestParameterDto, httpRequestDto).then((newParameter) => {
+			httpRequestDto.parameter ??= [];
+			httpRequestDto.parameter.push(newParameter);
+		});
+	}
+
+	public deleteParameter(
+		httpRequestParameterDto: HttpRequestParameterDto,
+		httpRequestDto: HttpRequestDto,
+		index: number,
+	): void {
+		RemoveParameter(httpRequestParameterDto).then(() => {
+			httpRequestDto.parameter.splice(index, 1);
+		});
+	}
+
+	public updateParameter(
+		httpRequestParameterDto: HttpRequestParameterDto,
+		httpRequestDto: HttpRequestDto,
+		index: number,
+	): void {
+		UpdateParameter(httpRequestParameterDto).then((newParameter) => {
+			httpRequestDto.parameter[index] = newParameter;
+		});
+	}
+
+	public disableEnvironmentHeader(environmentHeaderDTO: EnvironmentHeaderDTO, httpRequestDto: HttpRequestDto): void {
+		AddDisabledHeader(environmentHeaderDTO, httpRequestDto).then(() => {
+			httpRequestDto.disabledEnvironmentHeader ??= [];
+			httpRequestDto.disabledEnvironmentHeader.push(environmentHeaderDTO.id);
+		});
+	}
+
+	public enableEnvironmentHeader(environmentHeaderDTO: EnvironmentHeaderDTO, httpRequestDto: HttpRequestDto): void {
+		RemoveDisabledHeader(environmentHeaderDTO, httpRequestDto).then(() => {
+			httpRequestDto.disabledEnvironmentHeader = httpRequestDto.disabledEnvironmentHeader.filter(
+				(value) => value !== environmentHeaderDTO.id,
+			);
+		});
+	}
+
 	public create(collectionId: number, newRequestName: string, requestType: RequestTypes): void {
 		switch (requestType) {
-			case RequestTypes.HTTP:
-				let httpRequestDto = new HttpRequestDto();
+			case RequestTypes.HTTP: {
+				const httpRequestDto = new HttpRequestDto();
 				httpRequestDto.collectionId = collectionId;
 				httpRequestDto.name = newRequestName;
 				Create(httpRequestDto).then((newRequest: HttpRequestDto) => {
-					let collections = this._requests.toReversed();
+					const collections = this._requests.toReversed();
 					collections.push(newRequest);
 					this._requests = collections.toReversed();
 				});
 				break;
-			case RequestTypes.WEBSOCKET:
-				let websocketRequestDto = new WebsocketRequestDto();
+			}
+			case RequestTypes.WEBSOCKET: {
+				const websocketRequestDto = new WebsocketRequestDto();
 				websocketRequestDto.collectionId = collectionId;
 				websocketRequestDto.name = newRequestName;
 				CreateWebsocket(websocketRequestDto).then((newRequest: WebsocketRequestDto) => {
 					this._requests.push(newRequest);
 				});
 				break;
+			}
 		}
 	}
 

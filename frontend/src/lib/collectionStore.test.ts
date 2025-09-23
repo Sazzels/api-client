@@ -15,7 +15,7 @@ test('create collection store', async () => {
 		return Promise.resolve(collectionDto);
 	});
 
-	vi.spyOn(models, 'Delete').mockImplementation((collectionDto: CollectionDto): Promise<void> => {
+	vi.spyOn(models, 'Delete').mockImplementation((): Promise<void> => {
 		return Promise.resolve();
 	});
 

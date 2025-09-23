@@ -1,46 +1,33 @@
 <script lang="ts">
-	import { getRequestStore } from './requestStore.svelte';
 	import { frontend } from './wailsjs/go/models';
 	import { getEnvironmentStore } from '$lib/environmentStore.svelte.ts';
 
-	let { request, environmentId }: { request: frontend.HttpRequestDto; environmentId: number } = $props();
+	let { environment }: { environment: frontend.EnvironmentDTO } = $props();
 
-	const requestStore = getRequestStore();
 	const environmentStore = getEnvironmentStore();
-	let currentEnvironment = $derived(environmentStore.getById(environmentId));
-
 	let newHeaderKey = $state('');
 	let newHeaderValue = $state('');
 
-	let update = (header: frontend.HttpRequestHeaderDto, index: number): void => {
-		requestStore.updateHeader(header, request, index);
+	let update = (header: frontend.EnvironmentHeaderDTO, index: number): void => {
+		environmentStore.updateHeader(header, environment, index);
 	};
 
-	let deleteHeader = (header: frontend.HttpRequestHeaderDto, index: number): void => {
-		requestStore.deleteHeader(header, request, index);
+	let deleteHeader = (header: frontend.EnvironmentHeaderDTO, index: number): void => {
+		environmentStore.deleteHeader(header, environment, index);
 	};
 
 	let appendHeader = (): void => {
-		let header = new frontend.HttpRequestHeaderDto();
+		let header = new frontend.EnvironmentHeaderDTO();
 		header.key = newHeaderKey;
 		header.value = newHeaderValue;
-		header.httpRequestID = request.id;
-		requestStore.addHeader(header, request);
+		environmentStore.addHeader(header, environment);
 		newHeaderKey = '';
 		newHeaderValue = '';
 	};
-
-	function showEnvironmentHeader(header: frontend.EnvironmentHeaderDTO) {
-		requestStore.enableEnvironmentHeader(header, request);
-	}
-
-	function hideEnvironmentHeader(header: frontend.EnvironmentHeaderDTO) {
-		requestStore.disableEnvironmentHeader(header, request);
-	}
 </script>
 
-<div class="flex h-full flex-col overflow-y-auto pr-6">
-	<div class="mt-4 flex flex-row gap-1">
+<div class="flex h-full flex-col">
+	<div class="mt-2 flex flex-row gap-1 pr-4">
 		<div class="relative mx-auto w-full">
 			<input
 				bind:value={newHeaderKey}
@@ -101,73 +88,9 @@
 			</svg>
 		</button>
 	</div>
-	<div data-testid="environment-request-headers" class="mt-4">
-		{#each currentEnvironment.header as header (header.id)}
-			<div data-testid="environment-request-header" class="flex flex-row gap-1">
-				<input
-					value={header.key}
-					type="text"
-					disabled
-					class="peer border-background-accent focus:border-text-accent relative h-10 w-full rounded-sm border px-4
-					text-sm placeholder-transparent outline-hidden transition-all focus:outline-hidden
-					 focus-visible:outline-hidden"
-				/>
-				<input
-					value={header.value}
-					type="text"
-					disabled
-					class="peer border-background-accent focus:border-text-accent relative h-10 w-full rounded-sm border px-4
-					text-sm placeholder-transparent outline-hidden transition-all focus:outline-hidden
-					focus-visible:outline-hidden"
-				/>
-				{#if request.disabledEnvironmentHeader?.includes(header.id)}
-					<button aria-label="show" class="h-10" onclick={() => showEnvironmentHeader(header)}>
-						<svg
-							class="h-5"
-							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						>
-							<path stroke="none" d="M0 0h24v24H0z" fill="none" />
-							<path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" />
-							<path
-								d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87"
-							/>
-							<path d="M3 3l18 18" />
-						</svg>
-					</button>
-				{:else}
-					<button aria-label="hide" class="h-10" onclick={() => hideEnvironmentHeader(header)}>
-						<svg
-							class="h-5"
-							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						>
-							<path stroke="none" d="M0 0h24v24H0z" fill="none" />
-							<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
-							<path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
-						</svg>
-					</button>
-				{/if}
-			</div>
-		{/each}
-	</div>
-	<div data-testid="request-headers" class="mt-4 flex flex-col">
-		{#each request.header as header, iter (iter)}
-			<div class="flex h-full flex-row gap-1">
+	<div data-testid="environment-headers" class="mt-4 flex max-h-full flex-col overflow-y-auto pr-4">
+		{#each environment.header as header, iter (iter)}
+			<div data-testid="environment-header" class="flex flex-row gap-1">
 				<input
 					bind:value={header.key}
 					oninput={() => {

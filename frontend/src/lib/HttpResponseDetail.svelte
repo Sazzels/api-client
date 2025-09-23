@@ -30,7 +30,7 @@
 			<h4 class="text-text-highlight">Status-Code:</h4>
 			<ClipboardButton data={response.statusCode.toFixed(0)} />
 		</div>
-		<p>{response.statusCode}</p>
+		<p data-testid="status-code">{response.statusCode}</p>
 		<hr class="my-2 mr-2" />
 		<div class="mr-2 flex justify-between">
 			<h4 class="text-text-highlight">Elapsed Time:</h4>
@@ -42,15 +42,17 @@
 			<h4 class="text-text-highlight">Send Header:</h4>
 			<ClipboardButton data={JSON.stringify(response.sendHeader)} />
 		</div>
-		{#each Object.entries(response.sendHeader) as [key, value]}
-			<p><span class="text-text-response-headers">{key}</span> {value}</p>
-		{/each}
+		<div data-testid="send-headers">
+			{#each Object.entries(response.sendHeader) as [key, value] (key)}
+				<p><span class="text-text-response-headers">{key}</span> {value}</p>
+			{/each}
+		</div>
 		<hr class="my-2 mr-2" />
 		<div class="mr-2 flex justify-between">
 			<h4 class="text-text-highlight">Received Header:</h4>
 			<ClipboardButton data={JSON.stringify(response.receivedHeader)} />
 		</div>
-		{#each Object.entries(response.receivedHeader) as [key, value]}
+		{#each Object.entries(response.receivedHeader) as [key, value] (key)}
 			<p class="mr-2 break-words">
 				<span class="text-text-response-headers">{key}</span>
 				{value}
@@ -68,7 +70,7 @@
 		</div>
 		{#if isJsonResponse}
 			<div class="mr-2">
-				<pre class="overflow-x-auto whitespace-pre-wrap">{response.responseBody}</pre>
+				<pre data-testid="payload" class="overflow-x-auto whitespace-pre-wrap">{response.responseBody}</pre>
 			</div>
 		{:else}
 			<div class="mr-2 break-words">{response.responseBody}</div>
