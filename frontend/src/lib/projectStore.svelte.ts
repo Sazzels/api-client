@@ -15,10 +15,10 @@ export class ProjectStore {
 	}
 
 	public create(name: string): void {
-		let dto = new ProjectDto();
+		const dto = new ProjectDto();
 		dto.name = name;
 		Create(dto).then((project) => {
-			let projectsReversed = this._projects.toReversed();
+			const projectsReversed = this._projects.toReversed();
 			projectsReversed.push(project);
 			this._projects = projectsReversed.toReversed();
 		});
@@ -34,7 +34,7 @@ export class ProjectStore {
 
 	public update(project: ProjectDto): void {
 		Update(project).then((project) => {
-			let index = this._projects.findIndex((_project) => _project.id === project.id);
+			const index = this._projects.findIndex((_project) => _project.id === project.id);
 			this._projects[index] = project;
 		});
 	}

@@ -1,8 +1,9 @@
 package database
 
 import (
-	"gorm.io/gorm"
 	"strconv"
+
+	"gorm.io/gorm"
 )
 
 func SeedDatabase(databaseClient *gorm.DB) {

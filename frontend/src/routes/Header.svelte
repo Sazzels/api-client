@@ -5,7 +5,8 @@
 	import { getCollectionStore } from '$lib/collectionStore.svelte.ts';
 	import { getProjectStore } from '$lib/projectStore.svelte.ts';
 
-	let { settingOnClick }: { settingOnClick: () => void } = $props();
+	let { settingOnClick, environmentOnClick }: { settingOnClick: () => void; environmentOnClick: () => void } = $props();
+
 	const themeStore = getThemeStore();
 	const navigationSystem = getNavigationSystem();
 	const collectionStore = getCollectionStore();
@@ -13,7 +14,7 @@
 </script>
 
 <header class="px-2 pb-2">
-	<div class="flex flex-row items-center justify-between">
+	<div class="flex flex-row items-center justify-between py-2">
 		<nav aria-label="Breadcrumb">
 			<ol class="flex list-none items-stretch gap-2">
 				<li class="flex items-center gap-2">
@@ -135,6 +136,9 @@
 			</ol>
 		</nav>
 		<ul class="ml-auto flex flex-row items-center gap-2">
+			<li>
+				<button onclick={environmentOnClick} data-testid="open-environment">{'{'}env}</button>
+			</li>
 			<li class="flex items-center">
 				<button
 					onclick={() => {

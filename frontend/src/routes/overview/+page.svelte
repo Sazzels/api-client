@@ -52,7 +52,7 @@
 		</svg>
 	</div>
 	<div data-testid="projects" class="grid-cols-project-overview grid gap-2">
-		{#each projectStore.projects as project}
+		{#each projectStore.projects as project (project.id)}
 			<div
 				data-testid="project"
 				class="shadow-background-accent flex flex-row gap-2 overflow-hidden rounded-sm p-2 shadow-xs"

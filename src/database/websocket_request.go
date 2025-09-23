@@ -19,7 +19,7 @@ func NewWebsocketRequestRepository(database *gorm.DB) *WebsocketRequestRepositor
 
 func (W *WebsocketRequestRepository) GetAll() ([]WebsocketRequest, error) {
 	var websocketRequest []WebsocketRequest
-	err := W.database.Debug().Find(&websocketRequest).Error
+	err := W.database.Find(&websocketRequest).Error
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (W *WebsocketRequestRepository) GetAll() ([]WebsocketRequest, error) {
 
 func (W *WebsocketRequestRepository) GetById(id uint) (*WebsocketRequest, error) {
 	request := &WebsocketRequest{}
-	err := W.database.Debug().Find(request, id).Error
+	err := W.database.Find(request, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (W *WebsocketRequestRepository) GetById(id uint) (*WebsocketRequest, error)
 }
 
 func (W *WebsocketRequestRepository) Create(request *WebsocketRequest) (*WebsocketRequest, error) {
-	err := W.database.Debug().Create(request).Error
+	err := W.database.Create(request).Error
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (W *WebsocketRequestRepository) Create(request *WebsocketRequest) (*Websock
 }
 
 func (W *WebsocketRequestRepository) Update(request *WebsocketRequest) (*WebsocketRequest, error) {
-	err := W.database.Debug().Updates(request).Error
+	err := W.database.Updates(request).Error
 	if err != nil {
 		return nil, err
 	}
@@ -56,5 +56,5 @@ func (W *WebsocketRequestRepository) Update(request *WebsocketRequest) (*Websock
 }
 
 func (W *WebsocketRequestRepository) Delete(request *WebsocketRequest) error {
-	return W.database.Debug().Delete(request).Error
+	return W.database.Delete(request).Error
 }

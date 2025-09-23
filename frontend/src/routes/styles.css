@@ -91,6 +91,14 @@ input:focus-visible {
 	border-radius: 0.25rem;
 }
 
+input:disabled {
+	color: var(--color-text-disabled);
+}
+
 h1 {
 	font-size: 1.4rem;
+}
+
+button {
+	cursor: pointer;
 }

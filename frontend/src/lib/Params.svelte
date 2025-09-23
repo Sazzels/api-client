@@ -23,13 +23,12 @@
 	};
 	let preview = $derived(buildPreview(request));
 
-	let update = (): void => {
-		requestStore.update(request);
+	let update = (parameter: frontend.HttpRequestParameterDto, index: number): void => {
+		requestStore.updateParameter(parameter, request, index);
 	};
 
-	let deleteParameter = (index: number): void => {
-		request.parameter.splice(index, 1);
-		requestStore.update(request);
+	let deleteParameter = (parameter: frontend.HttpRequestParameterDto, index: number): void => {
+		requestStore.deleteParameter(parameter, request, index);
 	};
 
 	let appendParameter = (): void => {
@@ -39,12 +38,7 @@
 		let parameter = new frontend.HttpRequestParameterDto();
 		parameter.key = newParameterKey;
 		parameter.value = newParameterValue;
-		parameter.httpRequestID = request.id;
-		if (request.parameter === undefined || request.parameter === null) {
-			request.parameter = [];
-		}
-		request.parameter.push(parameter);
-		requestStore.update(request);
+		requestStore.addParameter(parameter, request);
 		newParameterKey = '';
 		newParameterValue = '';
 	};
@@ -116,12 +110,12 @@
 		</button>
 	</div>
 	<div data-testid="request-parameters" class="mt-4 flex max-h-full flex-col overflow-y-auto pr-4">
-		{#each request.parameter as parameter, iter}
+		{#each request.parameter as parameter, iter (iter)}
 			<div class="flex flex-row gap-1">
 				<input
 					bind:value={parameter.key}
 					oninput={() => {
-						update();
+						update(parameter, iter);
 					}}
 					type="text"
 					class="peer border-background-accent focus:border-text-accent relative h-10 w-full rounded-sm border px-4
@@ -130,13 +124,13 @@
 				<input
 					bind:value={parameter.value}
 					oninput={() => {
-						update();
+						update(parameter, iter);
 					}}
 					type="text"
 					class="peer border-background-accent focus:border-text-accent relative h-10 w-full rounded-sm border px-4
 					text-sm placeholder-transparent outline-hidden transition-all focus:outline-hidden focus-visible:outline-hidden"
 				/>
-				<button aria-label="delete" onclick={() => deleteParameter(iter)} class="h-10">
+				<button aria-label="delete" onclick={() => deleteParameter(parameter, iter)} class="h-10">
 					<svg
 						class="h-5"
 						xmlns="http://www.w3.org/2000/svg"

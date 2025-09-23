@@ -4,12 +4,13 @@ import (
 	"api-client/src/app"
 	"api-client/src/database"
 	"api-client/src/test"
-	"golang.org/x/net/websocket"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
 	"testing"
+
+	"golang.org/x/net/websocket"
 )
 
 func TestWebsocket(t *testing.T) {
@@ -36,7 +37,7 @@ func TestWebsocket(t *testing.T) {
 	if err != nil {
 		t.Fatal("should not fail to create project")
 	}
-	collectionsRepository := database.NewRepository[database.Collection](databaseClient)
+	collectionsRepository := database.NewCollectionRepository(databaseClient)
 	collection, err := collectionsRepository.Create(&database.Collection{
 		Name:              "test collection",
 		ProjectID:         project.ID,

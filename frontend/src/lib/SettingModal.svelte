@@ -1,17 +1,17 @@
 <script>
-	import { getSettingStore } from '$lib/settingStore.svelte.js';
+	import { getSettingStore } from '$lib/settingStore.svelte.ts';
 
-	let { showModal = $bindable() } = $props();
+	let { showSettingModal = $bindable() } = $props();
 	const settingStore = getSettingStore();
 	let dialog = $state(); // HTMLDialogElement
 	$effect(() => {
-		if (showModal) dialog.showModal();
+		if (showSettingModal) dialog.showModal();
 	});
 </script>
 
 <dialog
 	bind:this={dialog}
-	onclose={() => (showModal = false)}
+	onclose={() => (showSettingModal = false)}
 	onclick={(e) => {
 		if (e.target === dialog) dialog.close();
 	}}

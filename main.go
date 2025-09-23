@@ -7,7 +7,9 @@ import (
 	"api-client/src/frontend"
 	"api-client/src/runtime"
 	"embed"
+
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -31,10 +33,10 @@ func main() {
 	configurationReadWriter := configuration.NewReadWriter(xdgUserDir)
 	config := frontend.NewConfiguration(configurationReadWriter)
 	projectRepository := database.NewRepository[database.Project](databaseClient)
-	collectionsRepository := database.NewRepository[database.Collection](databaseClient)
+	collectionsRepository := database.NewCollectionRepository(databaseClient)
 	httpRequestRepository := database.NewHttpRequestRepository(databaseClient)
 	websocketRequestRepository := database.NewWebsocketRequestRepository(databaseClient)
-	request := frontend.NewRequest(httpRequestRepository, configurationReadWriter)
+	request := frontend.NewRequest(httpRequestRepository, configurationReadWriter, collectionsRepository)
 	wailsEvent := runtime.Wails{}
 	websocket := frontend.NewWebsocket(context, &wailsEvent)
 	projects := frontend.NewProjects(projectRepository)
@@ -42,6 +44,9 @@ func main() {
 	httpRequest := frontend.NewHttpRequests(httpRequestRepository)
 	websocketRequest := frontend.NewWebsocketRequests(websocketRequestRepository)
 	requests := frontend.NewRequests(httpRequest, websocketRequest)
+
+	environmentRepository := database.NewEnvironmentRepository(databaseClient)
+	environment := frontend.NewEnvironment(environmentRepository)
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:     "Api-Client",
@@ -64,10 +69,11 @@ func main() {
 			httpRequest,
 			websocketRequest,
 			websocket,
+			environment,
 		},
 	})
 
 	if err != nil {
-		println("Error:", err.Error())
+		log.Error().Msgf("Error: %s", err.Error())
 	}
 }

@@ -7,13 +7,21 @@ import (
 
 type HttpRequest struct {
 	gorm.Model
-	Name                 string
-	CollectionID         uint
-	Url                  string
-	Method               string `gorm:"default:GET"`
-	HttpRequestBody      HttpRequestBody
-	HttpRequestParameter []HttpRequestParameter
-	HttpRequestHeader    []HttpRequestHeader
+	Name                                 string
+	CollectionID                         uint
+	Url                                  string
+	Method                               string `gorm:"default:GET"`
+	HttpRequestBody                      HttpRequestBody
+	HttpRequestParameter                 []HttpRequestParameter
+	HttpRequestHeader                    []HttpRequestHeader
+	HttpRequestDisabledEnvironmentHeader []HttpRequestDisabledEnvironmentHeader
+}
+
+type HttpRequestDisabledEnvironmentHeader struct {
+	gorm.Model
+	HttpRequestID       uint
+	EnvironmentHeaderID uint
+	EnvironmentHeader   EnvironmentHeader
 }
 
 type HttpRequestBody struct {
@@ -95,6 +103,15 @@ func (H *HttpRequestRepository) CreateParameter(httpRequestParameter *HttpReques
 	return httpRequestParameter, nil
 }
 
+func (H *HttpRequestRepository) UpdateParameter(httpRequestParameter *HttpRequestParameter) (*HttpRequestParameter, error) {
+	err := H.database.Updates(httpRequestParameter).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return httpRequestParameter, nil
+}
+
 func (H *HttpRequestRepository) DeleteParameter(httpRequestParameter *HttpRequestParameter) error {
 	err := H.database.Delete(httpRequestParameter).Error
 	if err != nil {
@@ -113,9 +130,37 @@ func (H *HttpRequestRepository) CreateHeader(httpRequestHeader *HttpRequestHeade
 	return httpRequestHeader, nil
 }
 
+func (H *HttpRequestRepository) UpdateHeader(httpRequestHeader *HttpRequestHeader) (*HttpRequestHeader, error) {
+	err := H.database.Updates(httpRequestHeader).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return httpRequestHeader, nil
+}
+
 func (H *HttpRequestRepository) DeleteHeader(httpRequestHeader *HttpRequestHeader) error {
 	err := H.database.Delete(httpRequestHeader).Error
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (H *HttpRequestRepository) AddDisabledHeader(httpRequestDisabledEnvironmentHeader *HttpRequestDisabledEnvironmentHeader) (*HttpRequestDisabledEnvironmentHeader, error) {
+	err := H.database.Create(httpRequestDisabledEnvironmentHeader).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return httpRequestDisabledEnvironmentHeader, nil
+}
+
+func (H *HttpRequestRepository) RemoveDisabledHeader(httpRequestDisabledEnvironmentHeader *HttpRequestDisabledEnvironmentHeader) error {
+	err := H.database.Where("environment_header_id = ? and http_request_id = ?", httpRequestDisabledEnvironmentHeader.EnvironmentHeaderID, httpRequestDisabledEnvironmentHeader.HttpRequestID).Delete(&HttpRequestDisabledEnvironmentHeader{}).Error
+	if err != nil {
+		panic(err)
 		return err
 	}
 

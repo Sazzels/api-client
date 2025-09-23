@@ -104,7 +104,7 @@
 		</button>
 	</div>
 	<div id="messages" class="flex h-full flex-col gap-2 overflow-y-auto border">
-		{#each websocketState.messages as message}
+		{#each websocketState.messages as message (message)}
 			<div class="flex flex-row">
 				{#if message.type === WebsocketMessageType.Incoming}
 					<svg

@@ -13,7 +13,7 @@
 </script>
 
 <ul data-testid="request-tabs" class="flex items-center" role="tablist">
-	{#each tabs as tab}
+	{#each tabs as tab (tab)}
 		<li class="flex-1" role="presentation">
 			<button
 				onclick={() => changeTab(tab)}

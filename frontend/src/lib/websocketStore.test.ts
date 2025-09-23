@@ -2,13 +2,13 @@ import { expect, test, vi } from 'vitest';
 import { frontend } from './wailsjs/go/models';
 import * as models from '$lib/wailsjs/go/frontend/Websocket';
 import * as events from '$lib/wailsjs/runtime/runtime';
+import { WebsocketStore } from '$lib/websocketStore.svelte.ts';
 import WebsocketRequestDto = frontend.WebsocketRequestDto;
 import WebsocketStateDto = frontend.WebsocketStateDto;
-import { WebsocketStore } from '$lib/websocketStore.svelte.ts';
 
 test('create request store', async () => {
 	vi.spyOn(events, 'EventsOn').mockImplementation(
-		(eventName: string, callback: (...data: any) => void): (() => void) => {
+		(eventName: string, callback: (...data: WebsocketStateDto[]) => void): (() => void) => {
 			const websocketStateDto = new WebsocketStateDto(
 				'{"id":1,"error":"","connected":true,"incomingMessage":"hallo incoming"}',
 			);
@@ -22,7 +22,7 @@ test('create request store', async () => {
 
 	vi.spyOn(models, 'Connect').mockImplementation(
 		(websocketRequestDto: WebsocketRequestDto): Promise<WebsocketStateDto> => {
-			let websocketStateDto = new WebsocketStateDto('{"id":1,"error":"","connected":true,"incomingMessage":""}');
+			const websocketStateDto = new WebsocketStateDto('{"id":1,"error":"","connected":true,"incomingMessage":""}');
 			websocketStateDto.id = websocketRequestDto.id;
 
 			return Promise.resolve(websocketStateDto);
@@ -31,7 +31,7 @@ test('create request store', async () => {
 
 	vi.spyOn(models, 'Disconnect').mockImplementation(
 		(websocketRequestDto: WebsocketRequestDto): Promise<WebsocketStateDto> => {
-			let websocketStateDto = new WebsocketStateDto('{"id":1,"error":"","connected":false,"incomingMessage":""}');
+			const websocketStateDto = new WebsocketStateDto('{"id":1,"error":"","connected":false,"incomingMessage":""}');
 			websocketStateDto.id = websocketRequestDto.id;
 
 			return Promise.resolve(websocketStateDto);
@@ -39,8 +39,8 @@ test('create request store', async () => {
 	);
 
 	vi.spyOn(models, 'Send').mockImplementation(
-		(websocketRequestDto: WebsocketRequestDto, message: string): Promise<WebsocketStateDto> => {
-			let websocketStateDto = new WebsocketStateDto('{"id":1,"error":"","connected":true,"incomingMessage":""}');
+		(websocketRequestDto: WebsocketRequestDto): Promise<WebsocketStateDto> => {
+			const websocketStateDto = new WebsocketStateDto('{"id":1,"error":"","connected":true,"incomingMessage":""}');
 			websocketStateDto.id = websocketRequestDto.id;
 
 			return Promise.resolve(websocketStateDto);
@@ -53,7 +53,7 @@ test('create request store', async () => {
 	);
 	requestStore.connect(requestDtoOne);
 	await vi.waitFor(() => {
-		expect(requestStore.connections.get(requestDtoOne.id)?.connected).is.true;
+		expect(requestStore.connections.get(requestDtoOne.id)?.connected).toEqual(true);
 	});
 	requestStore.sendMessage(requestDtoOne, 'hallo');
 	await vi.waitFor(() => {
@@ -68,6 +68,6 @@ test('create request store', async () => {
 
 	requestStore.disconnect(requestDtoOne);
 	await vi.waitFor(() => {
-		expect(requestStore.getStateById(requestDtoOne.id)?.connected).is.false;
+		expect(requestStore.getStateById(requestDtoOne.id)?.connected).toEqual(false);
 	});
 });

@@ -4,6 +4,7 @@ import (
 	"api-client/src/configuration"
 	"api-client/src/database"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -14,6 +15,7 @@ import (
 
 type Request struct {
 	httpRequestRepository *database.HttpRequestRepository
+	collectionRepository  *database.CollectionRepository
 	configuration         *configuration.ReadWriter
 }
 
@@ -29,15 +31,25 @@ type RequestResponseDTO struct {
 	TlsSkipped     bool                `json:"tlsSkipped"`
 }
 
-func NewRequest(httpRequestRepository *database.HttpRequestRepository, configuration *configuration.ReadWriter) *Request {
+func NewRequest(
+	httpRequestRepository *database.HttpRequestRepository,
+	configuration *configuration.ReadWriter,
+	collectionRepository *database.CollectionRepository,
+) *Request {
 	return &Request{
 		httpRequestRepository: httpRequestRepository,
 		configuration:         configuration,
+		collectionRepository:  collectionRepository,
 	}
 }
 
 func (R *Request) Submit(requestId uint) (requestResponseDto RequestResponseDTO) {
 	httpRequest, err := R.httpRequestRepository.GetById(requestId)
+	if err != nil {
+		requestResponseDto.Error = err.Error()
+		return
+	}
+	collection, err := R.collectionRepository.GetById(httpRequest.CollectionID)
 	if err != nil {
 		requestResponseDto.Error = err.Error()
 		return
@@ -61,6 +73,18 @@ func (R *Request) Submit(requestId uint) (requestResponseDto RequestResponseDTO)
 		request.Header.Set("Content-Type", "application/json")
 	case "plaintext":
 		request.Header.Set("Content-Type", "text/plain")
+	}
+
+	disabledEnvironmentMap := make(map[uint]uint, len(httpRequest.HttpRequestDisabledEnvironmentHeader))
+	for _, envHeader := range httpRequest.HttpRequestDisabledEnvironmentHeader {
+		disabledEnvironmentMap[envHeader.EnvironmentHeaderID] = envHeader.EnvironmentHeaderID
+	}
+
+	for _, header := range collection.Environment.Header {
+		if _, ok := disabledEnvironmentMap[header.ID]; ok {
+			continue
+		}
+		request.Header.Set(header.Key, header.Value)
 	}
 
 	for _, header := range httpRequest.HttpRequestHeader {
@@ -102,7 +126,15 @@ func (R *Request) Submit(requestId uint) (requestResponseDto RequestResponseDTO)
 	startTime := time.Now()
 	response, err := client.Do(request)
 	endTime := time.Now()
-	requestResponseDto.ElapsedTime = endTime.Sub(startTime).String()
+	elapsedTime := endTime.Sub(startTime)
+	formattedElapsedTime := ""
+	switch true {
+	case elapsedTime.Seconds() > 1:
+		formattedElapsedTime = fmt.Sprintf("%.2fs", elapsedTime.Seconds())
+	case elapsedTime.Milliseconds() > 0:
+		formattedElapsedTime = fmt.Sprintf("%.2dms", elapsedTime.Milliseconds())
+	}
+	requestResponseDto.ElapsedTime = formattedElapsedTime
 	if err != nil {
 		requestResponseDto.Error = err.Error()
 		return
