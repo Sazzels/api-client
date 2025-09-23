@@ -19,7 +19,9 @@ func NewClient(userDir configuration.UserDir) *gorm.DB {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create data directory")
 	}
-	database, err := gorm.Open(sqlite.Open("file:"+userDir.GetDataPath()+Filename+SqliteOptions), &gorm.Config{})
+	database, err := gorm.Open(
+		sqlite.Open("file:"+userDir.GetDataPath()+Filename+SqliteOptions),
+		&gorm.Config{DisableForeignKeyConstraintWhenMigrating: true})
 	if err != nil {
 		log.Fatal().Msgf("failed opening connection to sqlite: %v", err)
 	}
@@ -33,6 +35,9 @@ func NewClient(userDir configuration.UserDir) *gorm.DB {
 
 func AutoMigrate(databaseClient *gorm.DB) {
 	err := databaseClient.AutoMigrate(
+		&EnvironmentHeader{},
+		&Environment{},
+		&HttpRequestDisabledEnvironmentHeader{},
 		&HttpRequestHeader{},
 		&HttpRequestParameter{},
 		&HttpRequestBody{},
@@ -43,6 +48,36 @@ func AutoMigrate(databaseClient *gorm.DB) {
 		&Project{},
 	)
 	if err != nil {
-		log.Fatal().Msg("migration was not successful")
+		log.Fatal().Msg("migration was not successful: " + err.Error())
 	}
+
+	CreateConstraintSafe(databaseClient, &Collection{}, "fk_collections_environment")
+	CreateConstraintSafe(databaseClient, &HttpRequestBody{}, "fk_http_requests_http_request_body")
+	CreateConstraintSafe(databaseClient, &HttpRequestHeader{}, "fk_http_requests_http_request_header")
+	CreateConstraintSafe(databaseClient, &HttpRequestParameter{}, "fk_http_requests_http_request_parameter")
+	CreateConstraintSafe(databaseClient, &HttpRequest{}, "fk_collections_http_requests")
+	CreateConstraintSafe(databaseClient, &WebsocketRequest{}, "fk_collections_websocket_requests")
+	CreateConstraintSafe(databaseClient, &GrpcRequest{}, "fk_collections_grpc_requests")
+	CreateConstraintSafe(databaseClient, &Collection{}, "fk_projects_collections")
+	CreateConstraintSafe(databaseClient, &EnvironmentHeader{}, "fk_environments_header")
+	CreateConstraintSafe(databaseClient, &HttpRequestDisabledEnvironmentHeader{}, "fk_http_requests_http_request_disabled_environment_header")
+	CreateConstraintSafe(databaseClient, &HttpRequestDisabledEnvironmentHeader{}, "fk_http_request_disabled_environment_headers_environment_header")
+
+}
+
+func CreateConstraintSafe[T any](databaseClient *gorm.DB, entity *T, constraint string) {
+	if databaseClient.Migrator().HasConstraint(entity, constraint) == true {
+		return
+	}
+	err := databaseClient.Migrator().CreateConstraint(entity, constraint)
+	if err != nil {
+		log.Fatal().Msg("error on constraint creation: " + err.Error())
+	}
+}
+
+func DeleteConstraintSafe[T any](databaseClient *gorm.DB, entity *T, constraint string) error {
+	if databaseClient.Migrator().HasConstraint(entity, constraint) == false {
+		return nil
+	}
+	return databaseClient.Migrator().DropConstraint(entity, constraint)
 }
