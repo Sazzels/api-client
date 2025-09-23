@@ -4,11 +4,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type Repository[T Project | Collection | GrpcRequest] struct {
+type Repository[T Project | GrpcRequest] struct {
 	database *gorm.DB
 }
 
-func NewRepository[T Project | Collection | GrpcRequest](database *gorm.DB) *Repository[T] {
+func NewRepository[T Project | GrpcRequest](database *gorm.DB) *Repository[T] {
 	return &Repository[T]{database}
 }
 

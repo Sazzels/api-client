@@ -37,7 +37,7 @@ func TestWebsocket(t *testing.T) {
 	if err != nil {
 		t.Fatal("should not fail to create project")
 	}
-	collectionsRepository := database.NewRepository[database.Collection](databaseClient)
+	collectionsRepository := database.NewCollectionRepository(databaseClient)
 	collection, err := collectionsRepository.Create(&database.Collection{
 		Name:              "test collection",
 		ProjectID:         project.ID,

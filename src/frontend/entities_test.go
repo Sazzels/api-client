@@ -12,7 +12,7 @@ func TestEntities(t *testing.T) {
 	databaseClient := database.NewClient(&userDir)
 	database.AutoMigrate(databaseClient)
 	projectRepository := database.NewRepository[database.Project](databaseClient)
-	collectionsRepository := database.NewRepository[database.Collection](databaseClient)
+	collectionsRepository := database.NewCollectionRepository(databaseClient)
 	httpRequestRepository := database.NewHttpRequestRepository(databaseClient)
 	websocketRequestRepository := database.NewWebsocketRequestRepository(databaseClient)
 	projects := NewProjects(projectRepository)
@@ -133,46 +133,37 @@ func TestEntities(t *testing.T) {
 	if httpRequestDto.Body.Payload != `{"key2": "value2"}` {
 		t.Fatal("http request body payload should be `{\"key2\":\"value2\"}`")
 	}
-	// header parameter update arie
-	httpRequestDto.Header = append(httpRequestDto.Header, HttpRequestHeaderDto{
+
+	httpRequestHeaderDto := HttpRequestHeaderDto{
 		HttpRequestID: httpRequestDto.ID,
 		Key:           "foo",
 		Value:         "bar",
-	})
+	}
+	httpRequestHeaderDto, err = httpRequests.AddHeader(httpRequestHeaderDto, httpRequestDto)
+	if err != nil {
+		t.Fatal("could not add header to http request")
+	}
+	httpRequestHeaderDto.Key = "abc"
+	httpRequestHeaderDto.Value = "def"
+	httpRequestHeaderDto, err = httpRequests.UpdateHeader(httpRequestHeaderDto)
+	if err != nil {
+		t.Fatal("could not update header")
+	}
 
-	httpRequestDto.Parameter = append(httpRequestDto.Parameter, HttpRequestParameterDto{
-		HttpRequestID: httpRequestDto.ID,
-		Key:           "hello",
-		Value:         "world",
-	})
-
-	httpRequestDto.Header = append(httpRequestDto.Header, HttpRequestHeaderDto{
-		HttpRequestID: httpRequestDto.ID,
-		Key:           "tom",
-		Value:         "riddle",
-	})
-
-	httpRequestDto.Parameter = append(httpRequestDto.Parameter, HttpRequestParameterDto{
+	httpRequestParameterDto := HttpRequestParameterDto{
 		HttpRequestID: httpRequestDto.ID,
 		Key:           "hero",
 		Value:         "aax",
-	})
-	httpRequestDto, err = httpRequests.Update(httpRequestDto)
-	if err != nil {
-		t.Fatal("error updating http request with header and parameter", err)
 	}
-
-	httpRequestDto.Header = httpRequestDto.Header[1:]
-	httpRequestDto.Parameter = httpRequestDto.Parameter[1:]
-
-	httpRequestDto.Header[0].Key = "abc"
-	httpRequestDto.Header[0].Value = "def"
-	httpRequestDto.Parameter[0].Key = "frodo"
-	httpRequestDto.Parameter[0].Value = "sam"
-
-	httpRequestDto, err = httpRequests.Update(httpRequestDto)
+	httpRequestParameterDto, err = httpRequests.AddParameter(httpRequestParameterDto, httpRequestDto)
 	if err != nil {
-		t.Fatal("error updating http request with removing and adding header and parameter", err)
+		t.Fatal("could not add parameter to http request")
+	}
+	httpRequestParameterDto.Key = "frodo"
+	httpRequestParameterDto.Value = "sam"
+	httpRequestParameterDto, err = httpRequests.UpdateParameter(httpRequestParameterDto)
+	if err != nil {
+		t.Fatal("could not update parameter")
 	}
 
 	httpRequestDtos, err = httpRequests.GetAll()

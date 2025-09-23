@@ -12,9 +12,10 @@ func TestDatabase(t *testing.T) {
 	AutoMigrate(databaseClient)
 
 	projectRepository := NewRepository[Project](databaseClient)
-	collectionRepository := NewRepository[Collection](databaseClient)
+	collectionRepository := NewCollectionRepository(databaseClient)
 	httpRequestRepository := NewHttpRequestRepository(databaseClient)
 	websocketRequestRepository := NewWebsocketRequestRepository(databaseClient)
+	environmentRepository := NewEnvironmentRepository(databaseClient)
 
 	project := &Project{
 		Name:        "NewProject1",
@@ -90,18 +91,31 @@ func TestDatabase(t *testing.T) {
 		Key:           "tom",
 		Value:         "riddle",
 	}
-	_, err = httpRequestRepository.CreateHeader(httpRequestHeader)
+	httpRequestHeader, err = httpRequestRepository.CreateHeader(httpRequestHeader)
 	if err != nil {
 		t.Fatal("http request header was not created")
 	}
+	httpRequestHeader.Key = "lord"
+	httpRequestHeader.Value = "voldemort"
+	_, err = httpRequestRepository.UpdateHeader(httpRequestHeader)
+	if err != nil {
+		t.Fatal("http request header could not be updated")
+	}
+
 	httpRequestParameter := &HttpRequestParameter{
 		HttpRequestID: httpRequest.ID,
 		Key:           "hero",
 		Value:         "aax",
 	}
-	_, err = httpRequestRepository.CreateParameter(httpRequestParameter)
+	httpRequestParameter, err = httpRequestRepository.CreateParameter(httpRequestParameter)
 	if err != nil {
 		t.Fatal("http request parameter was not created")
+	}
+	httpRequestParameter.Key = "tery"
+	httpRequestParameter.Value = "on"
+	_, err = httpRequestRepository.UpdateParameter(httpRequestParameter)
+	if err != nil {
+		t.Fatal("http request parameter could not be updated")
 	}
 
 	httpRequests, err := httpRequestRepository.GetAll()
@@ -133,6 +147,59 @@ func TestDatabase(t *testing.T) {
 	err = httpRequestRepository.DeleteParameter(&fullHttpRequest.HttpRequestParameter[0])
 	if err != nil {
 		t.Fatal("http request parameter was not deleted")
+	}
+
+	// environment
+	environment := &Environment{
+		Name: "superenv",
+	}
+
+	environment, err = environmentRepository.Create(environment)
+	if err != nil {
+		t.Fatal("could not create environment")
+	}
+
+	environment.Name = "megaenv"
+	environment, err = environmentRepository.Update(environment)
+	if err != nil {
+		t.Fatal("could not update environment")
+	}
+
+	environments, err := environmentRepository.GetAll()
+	if err != nil {
+		t.Fatal("could not get all environments")
+	}
+	if len(environments) != 1 {
+		t.Fatal("there should only be one environment")
+	}
+
+	environmentHeader := &EnvironmentHeader{
+		EnvironmentID: environment.ID,
+		Key:           "yolo",
+		Value:         "swag",
+	}
+	environmentHeader, err = environmentRepository.CreateHeader(environmentHeader)
+	if err != nil {
+		t.Fatal("could not create environment header")
+	}
+	environmentHeader.Key = "bilbo"
+	environmentHeader.Value = "beutlin"
+	environmentHeader, err = environmentRepository.UpdateHeader(environmentHeader)
+	if err != nil {
+		t.Fatal("could not update environment header")
+	}
+
+	httpRequestDisabledEnvironmentHeader := &HttpRequestDisabledEnvironmentHeader{
+		HttpRequestID:       httpRequest.ID,
+		EnvironmentHeaderID: environmentHeader.ID,
+	}
+	httpRequestDisabledEnvironmentHeader, err = httpRequestRepository.AddDisabledHeader(httpRequestDisabledEnvironmentHeader)
+	if err != nil {
+		t.Fatal("environment header could not be disabled")
+	}
+	err = httpRequestRepository.RemoveDisabledHeader(httpRequestDisabledEnvironmentHeader)
+	if err != nil {
+		t.Fatal("environment header could not be enabled")
 	}
 
 	// websocket
@@ -178,5 +245,13 @@ func TestDatabase(t *testing.T) {
 	err = websocketRequestRepository.Delete(websocketRequest)
 	if err != nil {
 		t.Fatal("websocket request was not deleted")
+	}
+	err = environmentRepository.DeleteHeader(environmentHeader)
+	if err != nil {
+		t.Fatal("environment header was not deleted")
+	}
+	err = environmentRepository.Delete(environment)
+	if err != nil {
+		t.Fatal("environment was not deleted")
 	}
 }
