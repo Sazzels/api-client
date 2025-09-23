@@ -44,7 +44,7 @@ test-frontend-unit-coverage:
 	cd frontend && npm run test:unit-coverage
 
 test-backend:
-	go test -race ./...
+	go test -race ./src/...
 
 backend-format-check:
 	gofmt -l .
@@ -65,5 +65,6 @@ frontend-check:
 	cd frontend && npm run check
 
 start-test-environment:
-	go run ./src/cmd/websocket-server.go &
+	go run ./cmd/websocket-server.go &
+	go run ./cmd/http-server.go &
 	wails dev -loglevel "Error"
