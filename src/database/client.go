@@ -2,10 +2,11 @@ package database
 
 import (
 	"api-client/src/configuration"
+	"os"
+
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"os"
 )
 
 const (

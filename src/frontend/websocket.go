@@ -3,9 +3,9 @@ package frontend
 import (
 	"api-client/src/app"
 	runtime2 "api-client/src/runtime"
-	"golang.org/x/net/websocket"
-	"log"
 	"runtime"
+
+	"golang.org/x/net/websocket"
 )
 
 type Websocket struct {
@@ -107,7 +107,6 @@ func (W *Websocket) receive(websocketRequestDto WebsocketRequestDto, connection 
 			websocketStateDto.Error = err.Error()
 			websocketStateDto.Connected = false
 			W.event.EventsEmit(W.ctx.Ctx, "websocket", websocketStateDto)
-			log.Println(err)
 			return
 		}
 		websocketStateDto.IncomingMessage = string(msg[:length])

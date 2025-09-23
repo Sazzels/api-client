@@ -2,8 +2,9 @@ package frontend
 
 import (
 	"api-client/src/database"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type ProjectDto struct {

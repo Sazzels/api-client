@@ -1,9 +1,10 @@
 package configuration
 
 import (
-	"github.com/pelletier/go-toml/v2"
 	"os"
 	"path/filepath"
+
+	"github.com/pelletier/go-toml/v2"
 )
 
 const (

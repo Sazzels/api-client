@@ -4,12 +4,13 @@ import (
 	"api-client/src/app"
 	"api-client/src/database"
 	"api-client/src/test"
-	"golang.org/x/net/websocket"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
 	"testing"
+
+	"golang.org/x/net/websocket"
 )
 
 func TestWebsocket(t *testing.T) {
