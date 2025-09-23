@@ -109,7 +109,7 @@
 			</div>
 		</div>
 		<div data-testid="requests" class="flex flex-col gap-2">
-			{#each requestStore.getByCollectionId(collectionId) as request}
+			{#each requestStore.getByCollectionId(collectionId) as request (request.id)}
 				<div class="flex w-full flex-row items-center justify-center gap-x-2">
 					<div
 						data-testid="request"

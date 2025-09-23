@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { frontend }        from './wailsjs/go/models';
+	import { frontend } from './wailsjs/go/models';
 	import { getRequestStore } from './requestStore.svelte';
 
 	const requestStore = getRequestStore();
 
 	let { request, submit }: { request: frontend.HttpRequestDto; submit: () => void } = $props();
-	let updateCount                                                                   = $state(0);
+	let updateCount = $state(0);
 
 	let update = (): void => {
 		updateCount++;
@@ -81,13 +81,13 @@
 						break-words transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-autofill:-top-2
 						peer-focus:-top-2 peer-focus:cursor-default peer-focus:text-xs before:absolute before:top-0 before:left-0
 						before:z-[-1] before:block before:h-full before:w-full before:transition-all"
-			>Request URL
+				>Request URL
 			</label>
 		</div>
 		<button
 			class="mb-1 flex justify-end p-1"
 			onclick={submit}
-			disabled="{updateCount !== 0}"
+			disabled={updateCount !== 0}
 			aria-label="button-submit"
 			id="run-request"
 		>

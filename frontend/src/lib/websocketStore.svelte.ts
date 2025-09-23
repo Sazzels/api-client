@@ -22,12 +22,12 @@ export class WebsocketStore {
 
 	public constructor() {
 		this.event = EventsOn('websocket', (websocketStateDto: frontend.WebsocketStateDto) => {
-			let internalState = this.connections.get(websocketStateDto.id);
+			const internalState = this.connections.get(websocketStateDto.id);
 			if (internalState === undefined) {
 				return;
 			}
 			if (websocketStateDto.incomingMessage !== '') {
-				let incomingMessage = new WebsocketMessage();
+				const incomingMessage = new WebsocketMessage();
 				incomingMessage.type = WebsocketMessageType.Incoming;
 				incomingMessage.value = websocketStateDto.incomingMessage;
 				internalState.messages.reverse();
@@ -44,22 +44,22 @@ export class WebsocketStore {
 			if (this.connections.get(websocketRequestDto.id) === undefined) {
 				this.connections.set(websocketRequestDto.id, new InternalState());
 			}
-			// @ts-ignore
+			// @ts-expect-error object undefined
 			this.connections.get(websocketRequestDto.id).connected = response.connected;
-			// @ts-ignore
+			// @ts-expect-error object undefined
 			this.connections.get(websocketRequestDto.id).error = response.error;
 		});
 	}
 
 	public sendMessage(websocketRequestDto: frontend.WebsocketRequestDto, message: string): void {
 		Send(websocketRequestDto, message).then((websocketStateDto: frontend.WebsocketStateDto) => {
-			let internalState = this.connections.get(websocketRequestDto.id);
+			const internalState = this.connections.get(websocketRequestDto.id);
 			if (internalState === undefined || !websocketStateDto.connected) {
 				return;
 			}
 			internalState.error = websocketStateDto.error;
 			internalState.connected = websocketStateDto.connected;
-			let outgoingMessage = new WebsocketMessage();
+			const outgoingMessage = new WebsocketMessage();
 			outgoingMessage.type = WebsocketMessageType.Outgoing;
 			outgoingMessage.value = message;
 			internalState.messages.reverse();
@@ -79,7 +79,7 @@ export class WebsocketStore {
 
 	public disconnect(websocketRequestDto: frontend.WebsocketRequestDto): void {
 		Disconnect(websocketRequestDto).then((websocketStateDto: frontend.WebsocketStateDto) => {
-			let internalState = this.connections.get(websocketRequestDto.id);
+			const internalState = this.connections.get(websocketRequestDto.id);
 			if (internalState === undefined) {
 				return;
 			}

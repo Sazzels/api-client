@@ -13,7 +13,7 @@ test('create project store', async () => {
 		return Promise.resolve(projectDto);
 	});
 
-	vi.spyOn(models, 'Delete').mockImplementation((projectDto: ProjectDto): Promise<void> => {
+	vi.spyOn(models, 'Delete').mockImplementation((): Promise<void> => {
 		return Promise.resolve();
 	});
 
