@@ -72,3 +72,27 @@ RUN . $NVM_DIR/nvm.sh && wails build -platform linux/amd64 -upx
 RUN ls -lah build/bin
 
 CMD ["tail", "-f", "/dev/null"]
+
+FROM golang:1.25.2-alpine3.22 AS alpine-builder
+
+RUN apk update && apk add -q webkit2gtk-4.1-dev wget bash gcc g++ make
+
+ENV NODE_PACKAGE_URL  https://unofficial-builds.nodejs.org/download/release/v24.5.0/node-v24.5.0-linux-x64-musl.tar.gz
+
+RUN apk add libstdc++
+WORKDIR /opt
+RUN wget $NODE_PACKAGE_URL
+RUN mkdir -p /opt/nodejs
+RUN tar -zxvf *.tar.gz --directory /opt/nodejs --strip-components=1
+RUN rm *.tar.gz
+RUN ln -s /opt/nodejs/bin/node /usr/local/bin/node
+RUN ln -s /opt/nodejs/bin/npm /usr/local/bin/npm
+
+WORKDIR /app
+
+COPY . .
+
+RUN make install
+
+RUN touch frontend/build/.gitignore
+RUN wails build -platform linux/amd64 -tags webkit2_41
